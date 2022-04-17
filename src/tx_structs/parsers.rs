@@ -7,10 +7,9 @@ pub fn compact_field(byte_vec: &mut Vec<u8>) -> usize {
     if size <= 252 {
         size
     } else {
-        let len_actual_size_bytes = size - 252;
-        let actual_size_bytes = usize::pow(2, u32::try_from(len_actual_size_bytes).unwrap());
+        let actual_size_bytes = usize::pow(2, u32::try_from(size - 252).unwrap());
         let size: Vec<u8> = byte_vec.drain(..actual_size_bytes).collect();
-        usize::from_le_bytes(size.as_slice().try_into().unwrap())
+        usize::from_le_bytes(size.try_into().unwrap())
     }
 }
 
@@ -22,7 +21,6 @@ pub fn tx_inputs(input_count: usize, byte_vec: &mut Vec<u8>) -> Vec<TXInput> {
     while i < input_count {
         let mut txid: Vec<u8> = byte_vec.drain(..32).collect();
         txid.reverse();
-        let txid: String = hex::encode(txid).clone();
 
         let vout: u32 =
             u32::from_le_bytes(byte_vec.drain(..4).as_slice()[0..4].try_into().unwrap());
@@ -30,18 +28,15 @@ pub fn tx_inputs(input_count: usize, byte_vec: &mut Vec<u8>) -> Vec<TXInput> {
         let script_sig_size = compact_field(byte_vec);
 
         let script_sig: Vec<u8> = byte_vec.drain(..script_sig_size).collect();
-        let script_sig: String = hex::encode(script_sig);
 
-        let mut sequence: Vec<u8> = byte_vec.drain(..4).collect();
-        sequence.reverse();
-        let sequence: String = hex::encode(sequence);
+        let sequence: Vec<u8> = byte_vec.drain(..4).collect();
 
         let inp = TXInput {
-            txid,
+            txid: hex::encode(txid),
             vout,
             script_sig_size,
-            script_sig,
-            sequence,
+            script_sig: hex::encode(script_sig),
+            sequence: hex::encode(sequence),
         };
 
         i += 1;
@@ -63,12 +58,11 @@ pub fn tx_outputs(output_count: usize, byte_vec: &mut Vec<u8>) -> Vec<TXOutput> 
         let script_pubkey_size = compact_field(byte_vec);
 
         let script_pubkey: Vec<u8> = byte_vec.drain(..script_pubkey_size).collect();
-        let script_pubkey: String = hex::encode(script_pubkey);
 
         let out = TXOutput {
             amount,
             script_pubkey_size,
-            script_pubkey,
+            script_pubkey: hex::encode(script_pubkey),
         };
 
         outputs.push(out);
