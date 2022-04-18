@@ -3,13 +3,12 @@ use crate::tx_structs::{tx_input::TXInput, tx_output::TXOutput};
 pub fn compact_field(byte_vec: &mut Vec<u8>) -> usize {
     let size: usize = usize::try_from(byte_vec[0]).unwrap();
     byte_vec.drain(..1);
-
     if size <= 252 {
         size
     } else {
         let actual_size_bytes = usize::pow(2, u32::try_from(size - 252).unwrap());
         let size: Vec<u8> = byte_vec.drain(..actual_size_bytes).collect();
-        usize::from_le_bytes(size.try_into().unwrap())
+        usize::from_str_radix(&hex::encode(size), 16).unwrap()
     }
 }
 
