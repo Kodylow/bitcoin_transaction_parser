@@ -4,5 +4,5 @@ pub struct TXInput {
     pub vout: u32,
     pub script_sig_size: usize,
     pub script_sig: String,
-    pub sequence: String,
+    pub sequence: u32,
 }
